@@ -86,8 +86,6 @@ public class Player {
 		path = new Tile[start.cost+1];
 		while(curr != end) {
 			int cost = start.cost;
-			System.out.println(curr.x + ", " + curr.y);
-			System.out.println("cost : " + curr.cost);
 			path[curr.cost] = curr;
 			for(Tile c : getTilesAroundAccessible(curr)) {
 				if(c.cost >= 0 && c.cost < cost) {
