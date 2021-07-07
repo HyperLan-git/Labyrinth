@@ -10,7 +10,7 @@ public class Tile {
 	private boolean isStart;
 	private boolean isEnd;
 	private boolean isVisited = false;
-	private Tile lastCaseVisited;
+	private Tile lastTileVisited;
 	private Line2D[] wallsHitboxes = new Line2D[4];
 
 	public Tile(int x, int y, boolean isStart, boolean isEnd) {
@@ -20,7 +20,7 @@ public class Tile {
 		this.isEnd = isEnd;
 	}
 
-	public void paint(Graphics graphics){
+	public void paint(Graphics graphics) {
 		Graphics2D g = ((Graphics2D)graphics);
 		g.setColor(Color.white);
 		if(isStart)
@@ -45,11 +45,11 @@ public class Tile {
 		return wallsHitboxes;
 	}
 
-	public boolean isStart(){
+	public boolean isStart() {
 		return isStart;
 	}
 
-	public boolean isEnd(){
+	public boolean isEnd() {
 		return isEnd;
 	}
 
@@ -60,15 +60,15 @@ public class Tile {
 	public void setVisited(boolean isVisited) {
 		this.isVisited = isVisited;
 		if(!isVisited)
-			setLastCaseVisited(null);
+			setLastTileVisited(null);
 	}
 	
-	public void setLastCaseVisited(Tile lastCaseVisited){
-		this.lastCaseVisited = lastCaseVisited;
+	public void setLastTileVisited(Tile lastTileVisited) {
+		this.lastTileVisited = lastTileVisited;
 		setVisited(true);
 	}
 	
-	public Tile getLastTileVisited(){
-		return lastCaseVisited;
+	public Tile getLastTileVisited() {
+		return lastTileVisited;
 	}
 }

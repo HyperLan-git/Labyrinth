@@ -64,12 +64,12 @@ public class Player {
 				Tile c = openSet.get(i);
 				openSet.remove(i);
 				if(c == start) {
-					Tile currentCase = end;
+					Tile currentTile = end;
 					int dist = c.cost;
 					Tile[] result = new Tile[dist+1];
 					while(dist >= 0) {
-						result[dist--] = currentCase;
-						currentCase = currentCase.getLastTileVisited();
+						result[dist--] = currentTile;
+						currentTile = currentTile.getLastTileVisited();
 					}
 					openSet.clear();
 					break;
@@ -78,7 +78,7 @@ public class Player {
 					if((neighbor.cost < 0 || neighbor.cost > c.cost+1) && (!closedSet.contains(neighbor) || !openSet.contains(neighbor))) {
 						neighbor.cost = c.cost+1;
 						openSet.add(neighbor);
-						neighbor.setLastCaseVisited(c);
+						neighbor.setLastTileVisited(c);
 					}
 				closedSet.add(c);
 			}

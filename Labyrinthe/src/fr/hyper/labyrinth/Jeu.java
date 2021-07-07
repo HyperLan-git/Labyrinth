@@ -23,38 +23,38 @@ public class Jeu extends JPanel {
 		for(int x = 0; x < WIDTH; x++)
 			for(int y = 0; y < HEIGHT; y++)
 				cases[x][y] = new Tile(x*20, y*20, (y==0 && x==0), (y == HEIGHT-1 && x == WIDTH-1));
-		Tile currentCase = cases[0][0];
-		while(currentCase != null) {
-			List<Tile> possibleCases = new ArrayList<Tile>();
-			for(Tile c : getCasesAround(currentCase))
+		Tile currentTile = cases[0][0];
+		while(currentTile != null) {
+			List<Tile> possibleTiles = new ArrayList<Tile>();
+			for(Tile c : getTilesAround(currentTile))
 				if(c != null && !c.isVisited())
-					possibleCases.add(c);
-			Tile newCase = (possibleCases.size()>0)?possibleCases.get((int)(Math.random()*possibleCases.size())):null;
-			currentCase.setVisited(true);
-			if(newCase == null)
-				currentCase = currentCase.getLastTileVisited();
+					possibleTiles.add(c);
+			Tile newTile = (possibleTiles.size()>0)?possibleTiles.get((int)(Math.random()*possibleTiles.size())):null;
+			currentTile.setVisited(true);
+			if(newTile == null)
+				currentTile = currentTile.getLastTileVisited();
 			else {
-				if(currentCase.x > newCase.x) {
-					newCase.rightBlocked = false;
-					currentCase.leftBlocked = false;
-				} else if(currentCase.x < newCase.x) {
-					newCase.leftBlocked = false;
-					currentCase.rightBlocked = false;
-				} else if(currentCase.y > newCase.y) {
-					currentCase.upBlocked = false;
-					newCase.downBlocked = false;
-				} else if(currentCase.y < newCase.y) {
-					currentCase.downBlocked = false;
-					newCase.upBlocked = false;
+				if(currentTile.x > newTile.x) {
+					newTile.rightBlocked = false;
+					currentTile.leftBlocked = false;
+				} else if(currentTile.x < newTile.x) {
+					newTile.leftBlocked = false;
+					currentTile.rightBlocked = false;
+				} else if(currentTile.y > newTile.y) {
+					currentTile.upBlocked = false;
+					newTile.downBlocked = false;
+				} else if(currentTile.y < newTile.y) {
+					currentTile.downBlocked = false;
+					newTile.upBlocked = false;
 				}
-				newCase.setLastCaseVisited(currentCase);
-				currentCase = newCase;
+				newTile.setLastTileVisited(currentTile);
+				currentTile = newTile;
 			}
 		}
 		p = new Player(cases);
 	}
 
-	public Tile[] getCasesAround(Tile c) {
+	public Tile[] getTilesAround(Tile c) {
 		Tile[] result = new Tile[4];
 		if(c.x/20<WIDTH-1)
 			result[0] = cases[c.x/20+1][c.y/20];
