@@ -9,7 +9,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-public class Labyrinthe extends JFrame implements KeyListener {
+public class Maze extends JFrame implements KeyListener {
 	private static final long serialVersionUID = 1695010021810078456L;
 
 	public static final double FPS = 60;
@@ -17,10 +17,10 @@ public class Labyrinthe extends JFrame implements KeyListener {
 	private Jeu jeu;
 
 	public static void main(String[] args) {
-		new Labyrinthe().setVisible(true);
+		new Maze().setVisible(true);
 	}
 
-	public Labyrinthe(){
+	public Maze(){
 		setBackground(Color.WHITE);
 		setTitle("Le labyrinthe ultime");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
