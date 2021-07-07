@@ -4,16 +4,16 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 
-public class Case {
+public class Tile {
 	public int x, y, cost = -1;
 	public boolean upBlocked = true, downBlocked = true, leftBlocked = true, rightBlocked = true;
 	private boolean isStart;
 	private boolean isEnd;
 	private boolean isVisited = false;
-	private Case lastCaseVisited;
+	private Tile lastCaseVisited;
 	private Line2D[] wallsHitboxes = new Line2D[4];
 
-	public Case(int x, int y, boolean isStart, boolean isEnd) {
+	public Tile(int x, int y, boolean isStart, boolean isEnd) {
 		this.x = x;
 		this.y = y;
 		this.isStart = isStart;
@@ -63,12 +63,12 @@ public class Case {
 			setLastCaseVisited(null);
 	}
 	
-	public void setLastCaseVisited(Case lastCaseVisited){
+	public void setLastCaseVisited(Tile lastCaseVisited){
 		this.lastCaseVisited = lastCaseVisited;
 		setVisited(true);
 	}
 	
-	public Case getLastCaseVisited(){
+	public Tile getLastTileVisited(){
 		return lastCaseVisited;
 	}
 }

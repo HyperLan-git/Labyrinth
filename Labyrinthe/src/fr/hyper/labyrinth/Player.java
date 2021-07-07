@@ -12,66 +12,69 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 public class Player {
-	public static final double movespeed = 4;
+	public static final double MOVESPEED = 6;
 
-	private List<Case> IAPath = new ArrayList<>();
+	private List<Tile> IAPath = new ArrayList<>();
 
 	private Ellipse2D hitbox = new Ellipse2D.Double(1, 1, 10, 10);
 
 	private double speedX = 0, speedY = 0;
 
-	private Case[][] grid;
+	private Tile[][] grid;
 
 	private boolean isIA = false, won = false;
 
-	public Player(Case[][] cases) {
+	public Player(Tile[][] cases) {
 		this.grid = cases;
 	}
 
 	private void calculateIAPath() {
-		IAPath.clear();
-		Case path = grid[Jeu.WIDTH-1][Jeu.HEIGHT-1];
-		IAPath.add(path);
-
-		while(path.getLastCaseVisited() != null) {
-			path = path.getLastCaseVisited();
+		synchronized(IAPath) {
+			IAPath.clear();
+			Tile path = grid[Jeu.WIDTH-1][Jeu.HEIGHT-1];
 			IAPath.add(path);
-		}
 
-		try {
-			if(!IAPath.contains(getCurrentCase()))
-				runPathFinder(getCurrentCase());
-		} catch(Exception e){
-			e.printStackTrace();
-			System.exit(1);
+			while(path.getLastTileVisited() != null) {
+				path = path.getLastTileVisited();
+				IAPath.add(path);
+			}
+
+			try {
+				if(!IAPath.contains(getCurrentTile()))
+					runPathfinder(getCurrentTile());
+			} catch(Exception e){
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
 	}
 
 	/**
 	 * @param start
 	 */
-	private void runPathFinder(Case start) {
-		ArrayList<Case> openSet = new ArrayList<>(), closedSet = new ArrayList<>();
-		Case end = grid[Jeu.WIDTH-1][Jeu.HEIGHT-1],
+	private void runPathfinder(Tile start) {
+		ArrayList<Tile> openSet = new ArrayList<>(), closedSet = new ArrayList<>();
+		Tile end = grid[Jeu.WIDTH-1][Jeu.HEIGHT-1],
 				curr = start,
 				path[];
 		openSet.add(end);
 		end.cost = 0;
 		while(!openSet.isEmpty()) {
 			for(int i = openSet.size()-1; i >= 0; i--) {
-				Case c = openSet.get(i);
+				Tile c = openSet.get(i);
 				openSet.remove(i);
 				if(c == start) {
-					Case currentCase = end;
+					Tile currentCase = end;
 					int dist = c.cost;
-					Case[] result = new Case[dist+1];
-					for(; dist >= 0 ; dist--) {
-						result[dist] = currentCase;
-						currentCase = currentCase.getLastCaseVisited();
+					Tile[] result = new Tile[dist+1];
+					while(dist >= 0) {
+						result[dist--] = currentCase;
+						currentCase = currentCase.getLastTileVisited();
 					}
-					return;
+					openSet.clear();
+					break;
 				}
-				for(Case neighbor : getCasesAroundAccessible(c))
+				for(Tile neighbor : getTilesAroundAccessible(c))
 					if((neighbor.cost < 0 || neighbor.cost > c.cost+1) && (!closedSet.contains(neighbor) || !openSet.contains(neighbor))) {
 						neighbor.cost = c.cost+1;
 						openSet.add(neighbor);
@@ -80,12 +83,13 @@ public class Player {
 				closedSet.add(c);
 			}
 		}
-		path = new Case[start.cost+1];
+		path = new Tile[start.cost+1];
 		while(curr != end) {
 			int cost = start.cost;
+			System.out.println(curr.x + ", " + curr.y);
 			System.out.println("cost : " + curr.cost);
 			path[curr.cost] = curr;
-			for(Case c : getCasesAroundAccessible(curr)) {
+			for(Tile c : getTilesAroundAccessible(curr)) {
 				if(c.cost >= 0 && c.cost < cost) {
 					cost = c.cost;
 					curr = c;
@@ -93,11 +97,13 @@ public class Player {
 			}
 		}
 		path[0] = end;
-		IAPath = Arrays.asList(path);
+		synchronized(IAPath) {
+			IAPath = Arrays.asList(path);
+		}
 	}
 
-	public ArrayList<Case> getCasesAroundAccessible(Case c){
-		ArrayList<Case> result = new ArrayList<>();
+	public ArrayList<Tile> getTilesAroundAccessible(Tile c){
+		ArrayList<Tile> result = new ArrayList<>();
 		if(c == null)
 			return null;
 		if(c.x/20 < Jeu.WIDTH-1 && !c.rightBlocked)
@@ -115,25 +121,25 @@ public class Player {
 		if(!isIA) switch(e.getKeyCode()) {
 		case KeyEvent.VK_DOWN:
 			if(e.getID() == KeyEvent.KEY_PRESSED)
-				speedY = movespeed;
+				speedY = MOVESPEED;
 			else if(e.getID() == KeyEvent.KEY_RELEASED)
 				speedY = 0;
 			break;
 		case KeyEvent.VK_UP:
 			if(e.getID() == KeyEvent.KEY_PRESSED)
-				speedY = -movespeed;
+				speedY = -MOVESPEED;
 			else if(e.getID() == KeyEvent.KEY_RELEASED)
 				speedY = 0;
 			break;
 		case KeyEvent.VK_RIGHT:
 			if(e.getID() == KeyEvent.KEY_PRESSED)
-				speedX = movespeed;
+				speedX = MOVESPEED;
 			else if(e.getID() == KeyEvent.KEY_RELEASED)
 				speedX = 0;
 			break;
 		case KeyEvent.VK_LEFT:
 			if(e.getID() == KeyEvent.KEY_PRESSED)
-				speedX = -movespeed;
+				speedX = -MOVESPEED;
 			else if(e.getID() == KeyEvent.KEY_RELEASED)
 				speedX = 0;
 			break;
@@ -142,7 +148,7 @@ public class Player {
 
 	private void checkCollisions() {
 		boolean hasCollided = false;
-		for(Case[] ligne : grid) for(Case c : ligne) {
+		for(Tile[] ligne : grid) for(Tile c : ligne) {
 			for(int i = 0; i < 4; i++) {
 				Line2D s = c.getWallsHitboxes()[i];
 				if(s != null && s.ptSegDistSq(this.getX(), this.getY()) < 25) {
@@ -151,15 +157,15 @@ public class Player {
 					if(horizontal) {
 						boolean isUp = this.getY() < s.getY1();
 						if(isUp)
-							move(0, -movespeed/4);
+							move(0, -MOVESPEED/4);
 						else
-							move(0, movespeed/4);
+							move(0, MOVESPEED/4);
 					} else {
 						boolean isLeft = this.getX() < s.getX1();
 						if(isLeft)
-							move(-movespeed/4, 0);
+							move(-MOVESPEED/4, 0);
 						else
-							move(movespeed/4, 0);
+							move(MOVESPEED/4, 0);
 					}
 				}
 			}
@@ -174,14 +180,14 @@ public class Player {
 
 	public void paint(Graphics g) {
 		g.setColor(Color.pink);
-		for(Case c : IAPath) {
+		synchronized(IAPath) {for(Tile c : IAPath)
 			g.drawRect(c.x+1, c.y+1, 17, 17);
 		}
 		g.setColor(Color.BLACK);
 		((Graphics2D)g).fill(hitbox);
 	}
 
-	private Case getCurrentCase() {
+	private Tile getCurrentTile() {
 		return grid[(int)(this.getX()/20.0)][(int)(this.getY()/20.0)];
 	}
 
@@ -207,25 +213,28 @@ public class Player {
 	}
 
 	public void update() {
-		for(int i = 0; i < 2; i++) {
+		//We got quartersteps this is mario 64 tech right there
+		for(int i = 0; i < 4; i++) {
 			if(isIA) {
 				this.speedX = 0;
 				this.speedY = 0;
-				Case c = getCurrentCase();
-				if(!IAPath.contains(c))
-					runPathFinder(c);
-				int index = IAPath.indexOf(c)-1;
-				if(index >= 0) {
-					Case last = IAPath.get(index);
+				Tile c = getCurrentTile();
+				synchronized(IAPath) {
+					if(!IAPath.contains(c))
+						runPathfinder(c);
+					int index = IAPath.indexOf(c)-1;
+					if(index >= 0) {
+						Tile last = IAPath.get(index);
 
-					if(this.getX() >= last.x+10)
-						speedX = -movespeed;
-					else
-						speedX = movespeed;
-					if(this.getY() > last.y+10)
-						speedY = -movespeed;
-					else
-						speedY = movespeed;
+						if(this.getX() >= last.x+10)
+							speedX = -MOVESPEED;
+						else
+							speedX = MOVESPEED;
+						if(this.getY() > last.y+10)
+							speedY = -MOVESPEED;
+						else
+							speedY = MOVESPEED;
+					}
 				}
 			}
 			moveStep();
@@ -246,7 +255,7 @@ public class Player {
 	}
 
 	private void moveStep() {
-		move(speedX/2.0, speedY/2.0);
+		move(speedX/4.0, speedY/4.0);
 		checkCollisions();
 	}
 }

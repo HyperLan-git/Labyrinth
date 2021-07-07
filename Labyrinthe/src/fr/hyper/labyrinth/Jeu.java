@@ -10,8 +10,9 @@ import java.util.List;
 import javax.swing.JPanel;
 
 public class Jeu extends JPanel {
+	private static final long serialVersionUID = -7756976894843229936L;
 	public static final int WIDTH = 90, HEIGHT = 47; 
-	private Case[][] cases = new Case[WIDTH][HEIGHT];
+	private Tile[][] cases = new Tile[WIDTH][HEIGHT];
 	private Player p;
 	private List<Point2D> playerPos = new ArrayList<>();
 	public Jeu() {
@@ -21,17 +22,17 @@ public class Jeu extends JPanel {
 	public void reset() {
 		for(int x = 0; x < WIDTH; x++)
 			for(int y = 0; y < HEIGHT; y++)
-				cases[x][y] = new Case(x*20, y*20, (y==0 && x==0), (y == HEIGHT-1 && x == WIDTH-1));
-		Case currentCase = cases[0][0];
+				cases[x][y] = new Tile(x*20, y*20, (y==0 && x==0), (y == HEIGHT-1 && x == WIDTH-1));
+		Tile currentCase = cases[0][0];
 		while(currentCase != null) {
-			List<Case> possibleCases = new ArrayList<Case>();
-			for(Case c : getCasesAround(currentCase))
+			List<Tile> possibleCases = new ArrayList<Tile>();
+			for(Tile c : getCasesAround(currentCase))
 				if(c != null && !c.isVisited())
 					possibleCases.add(c);
-			Case newCase = (possibleCases.size()>0)?possibleCases.get((int)(Math.random()*possibleCases.size())):null;
+			Tile newCase = (possibleCases.size()>0)?possibleCases.get((int)(Math.random()*possibleCases.size())):null;
 			currentCase.setVisited(true);
 			if(newCase == null)
-				currentCase = currentCase.getLastCaseVisited();
+				currentCase = currentCase.getLastTileVisited();
 			else {
 				if(currentCase.x > newCase.x) {
 					newCase.rightBlocked = false;
@@ -53,8 +54,8 @@ public class Jeu extends JPanel {
 		p = new Player(cases);
 	}
 
-	public Case[] getCasesAround(Case c) {
-		Case[] result = new Case[4];
+	public Tile[] getCasesAround(Tile c) {
+		Tile[] result = new Tile[4];
 		if(c.x/20<WIDTH-1)
 			result[0] = cases[c.x/20+1][c.y/20];
 		if(c.x/20>0)
@@ -74,16 +75,16 @@ public class Jeu extends JPanel {
 	@Override
 	public void paint(Graphics graphics) {
 		super.paint(graphics);
-		for(Case[] ligne : cases)
-			for(Case c : ligne)
+		for(Tile[] ligne : cases)
+			for(Tile c : ligne)
 				c.paint(graphics);
-		p.paint(graphics);
-		graphics.setColor(Color.black);
+		graphics.setColor(Color.LIGHT_GRAY);
 		for(int i = 0; i < playerPos.size()-1; i++) {
 			Point2D p1 = playerPos.get(i),
 					p2 = playerPos.get(i+1);
 			graphics.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
 		}
+		p.paint(graphics);
 	}
 
 	public void registerKeyEvent(KeyEvent e) {

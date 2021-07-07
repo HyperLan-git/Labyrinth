@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 public class Labyrinthe extends JFrame implements KeyListener {
 	private static final long serialVersionUID = 1695010021810078456L;
 
-	public static final double FPS = 120;
+	public static final double FPS = 60;
 
 	private Jeu jeu;
 
